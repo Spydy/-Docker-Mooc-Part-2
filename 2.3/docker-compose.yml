@@ -8,7 +8,7 @@ services:
       volumes:
         - ./logs.txt:/logs.txt
       container_name: backend-example
-
+ 
     frontend:
       image: frontend-example-docker
       ports:
