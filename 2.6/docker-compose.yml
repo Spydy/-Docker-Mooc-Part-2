@@ -1,0 +1,54 @@
+version: '3.5'
+
+services:
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - redis
+
+  db:
+    image: postgres
+    restart: unless-stopped
+    container_name: db-backend-2.6
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: mooc_example_user
+      POSTGRES_PASSWORD: mooc_example_password
+      POSTGRES_DB: mooc_example_database
+    networks:
+      - db
+
+  backend:
+    image: backend-example-docker
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    volumes:
+      - ./logs.txt:/logs.txt
+    container_name: backend-example-2.6
+    environment:
+      REDIS: redis
+      DB_USERNAME: mooc_example_user
+      DB_PASSWORD: mooc_example_password
+      DB_NAME: mooc_example_database
+      DB_HOST: db
+    networks:
+      - redis
+      - db
+    depends_on:
+      - db
+
+  frontend:
+    image: frontend-example-docker
+    ports:
+      - 5000:5000
+    container_name: frontend-example-2.6
+
+networks:
+  redis:
+    name: redis
+  db:
+    name: db
