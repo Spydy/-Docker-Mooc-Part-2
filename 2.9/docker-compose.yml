@@ -1,0 +1,71 @@
+version: '3.5'
+
+services:
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - redis
+
+  db:
+    image: postgres
+    restart: unless-stopped
+    container_name: db-backend-2.9
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: mooc_example_user
+      POSTGRES_PASSWORD: mooc_example_password
+      POSTGRES_DB: mooc_example_database
+    networks:
+      - db
+    volumes:
+      - ./database:/var/lib/postgresql/data
+
+  backend:
+    image: backend-example-docker
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    volumes:
+      - ./logs.txt:/logs.txt
+    container_name: backend-example-2.9
+    environment:
+      REDIS: redis
+      DB_USERNAME: mooc_example_user
+      DB_PASSWORD: mooc_example_password
+      DB_NAME: mooc_example_database
+      DB_HOST: db
+    networks:
+      - redis
+      - db
+      - proxy
+    depends_on:
+      - db
+
+  frontend:
+    image: frontend-example-docker
+    ports:
+      - 5000:5000
+    container_name: frontend-example-2.9
+    networks:
+      - proxy
+
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    container_name: nginx-2.9
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - proxy
+
+networks:
+  redis:
+    name: redis
+  db:
+    name: db
+  proxy:
+    name: proxy
