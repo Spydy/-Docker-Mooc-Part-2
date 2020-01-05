@@ -1,0 +1,1 @@
+Had to change FRONT_URL variable to http://localhost instead of http://localhost:5000 in the backend Dockefile.
